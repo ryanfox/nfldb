@@ -154,7 +154,7 @@ def update_players(cursor, interval):
     ''')
 
     log('Updating %d players... ' % len(nflgame.players), end='')
-    for p in nflgame.players.itervalues():
+    for p in nflgame.players.values():
         dbp = nfldb.Player._from_nflgame_player(db, p)
         for table, prim, vals in dbp._rows:
             nfldb.db._upsert(cursor, table, vals, prim)
@@ -315,7 +315,7 @@ def update_current_week_schedule(db):
     phase, year, week = nfldb.current(db)
     log('Updating schedule for (%s, %d, %d)' % (phase, year, week))
     with nfldb.Tx(db) as cursor:
-        for gsis_id, info in nflgame.sched.games.iteritems():
+        for gsis_id, info in nflgame.sched.games.items():
             if year == info['year'] and week == info['week'] \
                     and phase == phase_map[info['season_type']]:
                 g = game_from_id(cursor, gsis_id)

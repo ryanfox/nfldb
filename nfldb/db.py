@@ -1,5 +1,5 @@
 from __future__ import absolute_import, division, print_function
-import ConfigParser
+import configparser
 import datetime
 import os
 import os.path as path
@@ -68,7 +68,7 @@ def config(config_path=''):
         path.join(_config_home, 'nfldb', 'config.ini'),
     ]
     tried = []
-    cp = ConfigParser.RawConfigParser()
+    cp = configparser.RawConfigParser()
     for p in paths:
         tried.append(p)
         try:
@@ -350,7 +350,7 @@ def _big_insert(cursor, table, datas):
 
     def vals(xs):
         return [v for _, v in xs]
-    values = ', '.join(_mogrify(cursor, times(vals(data))) for data in datas)
+    values = ', '.join(_mogrify(cursor, times(vals(data))).decode() for data in datas)
 
     cursor.execute('INSERT INTO %s (%s) VALUES %s'
                    % (table, insert_fields, values))
@@ -440,7 +440,7 @@ def _migrate(conn, to):
     assert current <= to
 
     globs = globals()
-    for v in xrange(current+1, to+1):
+    for v in range(current+1, to+1):
         fname = '_migrate_%d' % v
         with Tx(conn) as c:
             assert fname in globs, 'Migration function %d not defined.' % v

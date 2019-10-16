@@ -9,8 +9,8 @@ import re
 from psycopg2.extensions import cursor as tuple_cursor
 
 from nfldb.db import Tx
-import nfldb.sql as sql
-import nfldb.types as types
+from nfldb import sql
+from nfldb import types
 
 try:
     strtype = basestring
@@ -210,7 +210,7 @@ def guess_position(pps):
     counts = defaultdict(int)
     for pp in pps:
         counts[pp.guess_position] += 1
-    return max(counts.items(), key=lambda (_, count): count)[0]
+    return max(counts.items(), key=lambda _, count: count)[0]
 
 
 def _append_conds(conds, entity, kwargs):
@@ -289,7 +289,7 @@ class Condition (object):
             return c._sql_where(cursor, aliases=aliases, aggregate=aggregate)
         ds = []
         for conjuncts in disjuncts:
-            ds.append(' AND '.join('(%s)' % sql(c) for c in conjuncts))
+            ds.append(' AND '.join('(%s)' % sql(c).decode() for c in conjuncts))
         return ' OR '.join('(%s)' % d for d in ds if d)
 
 
@@ -961,7 +961,7 @@ class Query (Condition):
                     continue
                 joins += types.PlayPlayer._sql_join_to_all(ent)
 
-            sum_fields = types._player_categories.keys() \
+            sum_fields = list(types._player_categories.keys()) \
                 + AggPP._sql_tables['derived']
             select_sum_fields = AggPP._sql_select_fields(sum_fields)
             where = self._sql_where(cur)
